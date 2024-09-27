@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"log"
 	"net/http"
@@ -15,12 +19,24 @@ import (
 const storagePath = "./storage"
 
 type FileInfo struct {
-	ID        string
-	FileName  string
-	UploadURL string
+	ID        string `bson:"_id,omitempty"`
+	FileName  string `bson:"filename"`
+	UploadURL string `bson:"upload_url"`
 }
 
-var fileStorage = map[string]FileInfo{}
+func connectMongo() (*mongo.Client, *mongo.Collection) {
+	connect, err := mongo.Connect(context.Background(), options.Client().
+		ApplyURI("mongodb://user:password@mongodb:27017/"))
+	if err != nil {
+		panic(err)
+	}
+	err = connect.Ping(context.Background(), nil)
+	if err != nil {
+		panic(err)
+	}
+	client := connect.Database("S3").Collection("files")
+	return connect, client
+}
 
 func generateFileName() string {
 	return uuid.New().String()
@@ -31,7 +47,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	fmt.Println(r.MultipartForm)
 	file, handler, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, "Не удалось получить файл", http.StatusBadRequest)
@@ -56,10 +71,19 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	downloadURL := fmt.Sprintf("http://localhost:8080/files/%s", fileID)
 
-	fileStorage[fileID] = FileInfo{
+	client, collection := connectMongo()
+	defer client.Disconnect(context.TODO())
+
+	fileInfo := FileInfo{
 		ID:        fileID,
 		FileName:  handler.Filename,
 		UploadURL: downloadURL,
+	}
+
+	_, err = collection.InsertOne(context.TODO(), fileInfo)
+	if err != nil {
+		http.Error(w, "Не удалось сохранить информацию о файле в базу данных", http.StatusInternalServerError)
+		return
 	}
 
 	fmt.Fprintf(w, "Файл загружен: %s\n", downloadURL)
@@ -69,50 +93,62 @@ func getFileLink(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fileID := vars["id"]
 
-	fileInfo, exists := fileStorage[fileID]
-	if !exists {
+	client, collection := connectMongo()
+	defer client.Disconnect(context.TODO())
+
+	var fileInfo FileInfo
+	err := collection.FindOne(context.TODO(), bson.M{"_id": fileID}).Decode(&fileInfo)
+	if err != nil {
 		http.Error(w, "Файл не найден", http.StatusNotFound)
 		return
 	}
 
+	// Возвращаем ссылку на файл
 	fmt.Fprintf(w, "Ссылка на файл: %s\n", fileInfo.UploadURL)
 }
 
+// Скачивание файла по ID
 func downloadFile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fileID := vars["id"]
 
 	filePath := filepath.Join(storagePath, fileID)
 
+	// Проверяем, существует ли файл
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		http.Error(w, "Файл не найден", http.StatusNotFound)
 		return
 	}
 
+	// Отправляем файл клиенту
 	w.Header().Set("Content-Disposition", "attachment; filename="+fileID)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	http.ServeFile(w, r, filePath)
 }
 
-// Удаление фото по ID
+// Удаление файла по ID из MongoDB и файловой системы
 func deleteFile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fileID := vars["id"]
 
-	filePath := filepath.Join(storagePath, fileID)
+	client, collection := connectMongo()
+	defer client.Disconnect(context.TODO())
 
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		http.Error(w, "Файл не найден", http.StatusNotFound)
+	// Удаляем информацию о файле из MongoDB
+	_, err := collection.DeleteOne(context.TODO(), bson.M{"_id": fileID})
+	if err != nil {
+		http.Error(w, "Ошибка при удалении информации о файле из базы данных", http.StatusInternalServerError)
 		return
 	}
 
-	err := os.Remove(filePath)
+	filePath := filepath.Join(storagePath, fileID)
+
+	// Удаляем файл с файловой системы
+	err = os.Remove(filePath)
 	if err != nil {
 		http.Error(w, "Ошибка при удалении файла", http.StatusInternalServerError)
 		return
 	}
-
-	delete(fileStorage, fileID)
 
 	fmt.Fprintf(w, "Файл удален: %s\n", fileID)
 }

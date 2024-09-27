@@ -10,7 +10,7 @@ COPY . .
 
 EXPOSE 8080
 
-RUN go build -o main ./main.go
+RUN go build -o main ./cmd/main/main.go
 
 FROM alpine:latest
 
