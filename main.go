@@ -27,7 +27,10 @@ func generateFileName() string {
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		return
+	}
 	fmt.Println(r.MultipartForm)
 	file, handler, err := r.FormFile("file")
 	if err != nil {
