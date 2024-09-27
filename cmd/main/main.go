@@ -86,7 +86,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Файл загружен: %s\n", downloadURL)
+	fmt.Fprintf(w, "%s", downloadURL)
 }
 
 func getFileLink(w http.ResponseWriter, r *http.Request) {

@@ -64,5 +64,5 @@ func main() {
 		return
 	}
 
-	fmt.Println("Ответ от сервера:", response)
+	fmt.Println(response)
 }
