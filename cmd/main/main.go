@@ -26,7 +26,7 @@ type FileInfo struct {
 
 func connectMongo() (*mongo.Client, *mongo.Collection) {
 	connect, err := mongo.Connect(context.Background(), options.Client().
-		ApplyURI("mongodb://user:password@mongodb:27017/"))
+		ApplyURI("mongodb://user:password@mongodb:52/"))
 	if err != nil {
 		panic(err)
 	}
