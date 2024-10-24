@@ -24,9 +24,11 @@ type FileInfo struct {
 	UploadURL string `bson:"upload_url"`
 }
 
+var connectMongoFunc = connectMongo
+
 func connectMongo() (*mongo.Client, *mongo.Collection) {
 	connect, err := mongo.Connect(context.Background(), options.Client().
-		ApplyURI("mongodb://user:password@mongodb:52/"))
+		ApplyURI("mongodb://user:password@mongodb:27017/"))
 	if err != nil {
 		panic(err)
 	}

@@ -1,21 +1,20 @@
 version: '3.7'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongodb
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - mongodb
   mongodb:
     image: mongodb/mongodb-community-server:6.0-ubi8
-    command: mongod --port 52
     environment:
       - MONGODB_INITDB_ROOT_USERNAME=user
       - MONGODB_INITDB_ROOT_PASSWORD=password
     ports:
-      - "52:52"
+      - "27017:27017"
     volumes:
       - type: volume
         source: mongodb-volume-data
