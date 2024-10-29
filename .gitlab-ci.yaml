@@ -6,7 +6,7 @@ services:
 stages:
   - build
   - test
-#  - deploy
+  - deploy
 
 before_script:
   - apk add --no-cache curl bash jq sshpass
@@ -54,16 +54,17 @@ test:
     - echo "Удаление тестовой базы MongoDB"
     - docker-compose down
 
-#deploy:
-#  stage: deploy
-#  only:
-#    - master
-#  before_script:
-#    - apk add --no-cache openssh sshpass
-#  script:
-#    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_SERVER" '
-#        echo '"$CI_REGISTRY_PASSWORD"' | docker login --username '"$CI_REGISTRY_USER"' --password-stdin '"$CI_REGISTRY"' &&
-#        cd /root/testCD &&
-#        docker compose pull &&
-#        docker compose up -d --no-build
-#      '
+deploy:
+ stage: deploy
+ only:
+   - master
+ before_script:
+   - apk add --no-cache openssh sshpass
+ script:
+   - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_SERVER" '
+       echo '"$CI_REGISTRY_PASSWORD"' | docker login --username '"$CI_REGISTRY_USER"' --password-stdin '"$CI_REGISTRY"' &&
+       cd /root/compose-env &&
+       docker compose pull &&
+       docker compose up -d --no-build
+     '
+
