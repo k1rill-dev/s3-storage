@@ -24,8 +24,6 @@ type FileInfo struct {
 	UploadURL string `bson:"upload_url"`
 }
 
-var connectMongoFunc = connectMongo
-
 func connectMongo() (*mongo.Client, *mongo.Collection) {
 	connect, err := mongo.Connect(context.Background(), options.Client().
 		ApplyURI("mongodb://user:password@mongodb:27017/"))
@@ -71,7 +69,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	downloadURL := fmt.Sprintf("http://localhost:8080/files/%s", fileID)
+	downloadURL := fmt.Sprintf("http://92.53.105.243:8081/files/%s", fileID)
 
 	client, collection := connectMongo()
 	defer client.Disconnect(context.TODO())
@@ -168,8 +166,8 @@ func main() {
 	r.HandleFunc("/link/{id}", getFileLink).Methods("GET")
 	r.HandleFunc("/files/{id}", deleteFile).Methods("DELETE")
 
-	log.Println("Сервер запущен на порту :8080")
-	err = http.ListenAndServe(":8080", r)
+	log.Println("Сервер запущен на порту :8081")
+	err = http.ListenAndServe(":8081", r)
 	if err != nil {
 		return
 	}
