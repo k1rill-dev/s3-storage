@@ -52,7 +52,6 @@ test:
     - go test ./...
   after_script:
     - echo "Удаление тестовой базы MongoDB"
-    - docker-compose down
 
 deploy:
  stage: deploy
