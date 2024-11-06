@@ -67,12 +67,10 @@ func TestUploadFile(t *testing.T) {
 
 	// Создаем ResponseRecorder для записи ответа
 	rr := httptest.NewRecorder()
-
 	// Инициализация mtest для MongoDB
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-
 	// Подменяем функцию connectMongoFunc заглушкой
-	connectMongoFunc = func() (*mongo.Client, *mongo.Collection) {
+	_ = func() (*mongo.Client, *mongo.Collection) {
 		client := mt.Client // Используем mtest.Client для тестирования
 		collection := client.Database("S3").Collection("files")
 		return client, collection
@@ -88,7 +86,7 @@ func TestUploadFile(t *testing.T) {
 	}
 
 	// Проверяем содержимое ответа
-	if !strings.Contains(rr.Body.String(), "http://localhost:8080/files/") {
+	if !strings.Contains(rr.Body.String(), "http://92.53.105.243:8081/files/") {
 		t.Errorf("Ожидался URL загрузки файла, получен %v", rr.Body.String())
 	}
 }

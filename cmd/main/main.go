@@ -25,15 +25,27 @@ type FileInfo struct {
 }
 
 func connectMongo() (*mongo.Client, *mongo.Collection) {
-	connect, err := mongo.Connect(context.Background(), options.Client().
-		ApplyURI("mongodb://user:password@mongodb:27017/"))
+	uris := []string{
+		"mongodb://user:password@mongodb:27017/",
+		"mongodb://user:password@localhost:27017/",
+	}
+
+	var connect *mongo.Client
+	var err error
+	for _, uri := range uris {
+		connect, err = mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+		if err == nil {
+			err = connect.Ping(context.Background(), nil)
+			if err == nil {
+				break
+			}
+		}
+	}
+
 	if err != nil {
 		panic(err)
 	}
-	err = connect.Ping(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
+
 	client := connect.Database("S3").Collection("files")
 	return connect, client
 }
