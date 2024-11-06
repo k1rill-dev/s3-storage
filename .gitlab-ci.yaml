@@ -61,6 +61,7 @@ deploy:
    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_SERVER" '
        echo '"$CI_REGISTRY_PASSWORD"' | docker login --username '"$CI_REGISTRY_USER"' --password-stdin '"$CI_REGISTRY"' &&
        cd /root/compose-env &&
+       docker build -t compose-env-openresty:latest /root/compose-env/nginx/. &&
        docker compose pull &&
        docker compose up -d --no-build
      '
