@@ -50,8 +50,6 @@ test:
     - sleep 10  # Даем время для запуска MongoDB
     - echo "Запуск юнит-тестов"
     - go test ./...
-  after_script:
-    - echo "Удаление тестовой базы MongoDB"
 
 deploy:
  stage: deploy
