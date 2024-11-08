@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c4cbb2-d26c-44da-a7a0-d18a15c55b5f" name="Changes" comment="fix bug">
+    <list default="true" id="78c4cbb2-d26c-44da-a7a0-d18a15c55b5f" name="Changes" comment="fix tests and main">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main/main_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main/main_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +114,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add error handler" />
     <MESSAGE value="fix bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix bug" />
+    <MESSAGE value="fix tests and main" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix tests and main" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
